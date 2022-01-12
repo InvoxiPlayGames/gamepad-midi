@@ -67,9 +67,16 @@ namespace GamepadMidi
     {
       if (mon == null) return;
       batteryInfo.Text = "Disconnected";
-      mon.OnStateChanged -= keytarTranslator.ControllerEventHandler;
-      mon.OnStateChanged -= drumTranslator.ControllerEventHandler;
-      mon.OnStateChanged -= proGuitarTranslator.ControllerEventHandler;
+      if (mon is XboxControllerMonitor xmon)
+      {
+        xmon.OnXboxStateChanged -= keytarTranslator.ControllerEventHandler;
+        xmon.OnXboxStateChanged -= drumTranslator.ControllerEventHandler;
+        xmon.OnXboxStateChanged -= proGuitarTranslator.ControllerEventHandler;
+      }
+      if (mon is USBControllerMonitor umon)
+      {
+        umon.OnUSBStateChanged -= keytarTranslator.WiiEventHandler;
+      }
       mon.Dispose();
       mon = null;
     }
@@ -95,23 +102,34 @@ namespace GamepadMidi
       DisposeMonitor();
       if (controllers.SelectedItem is Controller c)
       {
-        mon = new ControllerMonitor(c);
-        mon.OnDisconnect += Controller_OnDisconnect;
-        if (c.Capabilities.SubType == XInput.DevSubType.Keytar)
+        if (c.Platform == ControllerPlatform.XInput)
         {
-          mon.OnStateChanged += keytarTranslator.ControllerEventHandler;
+          mon = new XboxControllerMonitor(c);
+          mon.OnDisconnect += Controller_OnDisconnect;
+          if (c.Capabilities.SubType == XInput.DevSubType.Keytar)
+          {
+            ((XboxControllerMonitor)mon).OnXboxStateChanged += keytarTranslator.ControllerEventHandler;
+          }
+          else if (c.Capabilities.SubType == XInput.DevSubType.DrumKit)
+          {
+            ((XboxControllerMonitor)mon).OnXboxStateChanged += drumTranslator.ControllerEventHandler;
+          }
+          else if (c.Capabilities.SubType == XInput.DevSubType.ProGuitar)
+          {
+            ((XboxControllerMonitor)mon).OnXboxStateChanged += proGuitarTranslator.ControllerEventHandler;
+          }
+          XInput.BatteryInformation xbi = default;
+          XInput.XInputGetBatteryInformation(((Controller)controllers.SelectedItem).Index, XInput.BatteryDevType.Gamepad, ref xbi);
+          batteryInfo.Text = $"Connected. Battery: {xbi.BatteryType} {xbi.BatteryLevel}";
+        } else if (c.Platform == ControllerPlatform.USB) {
+          mon = new USBControllerMonitor(c);
+          mon.OnDisconnect += Controller_OnDisconnect;
+          if (c.Type == ControllerType.Keytar)
+          {
+            ((USBControllerMonitor)mon).OnUSBStateChanged += keytarTranslator.WiiEventHandler;
+          }
+          batteryInfo.Text = "Connected";
         }
-        else if (c.Capabilities.SubType == XInput.DevSubType.DrumKit)
-        {
-          mon.OnStateChanged += drumTranslator.ControllerEventHandler;
-        }
-        else if (c.Capabilities.SubType == XInput.DevSubType.ProGuitar)
-        {
-          mon.OnStateChanged += proGuitarTranslator.ControllerEventHandler;
-        }
-        XInput.BatteryInformation xbi = default;
-        XInput.XInputGetBatteryInformation(((Controller)controllers.SelectedItem).Index, XInput.BatteryDevType.Gamepad, ref xbi);
-        batteryInfo.Text = $"Connected. Battery: {xbi.BatteryType} {xbi.BatteryLevel}";
       }
     }
   }

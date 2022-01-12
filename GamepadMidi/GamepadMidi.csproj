@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LibUsbDotNet.LibUsbDotNet, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c677239abe1e02a9, processorArchitecture=MSIL">
+      <HintPath>..\packages\LibUsbDotNet.2.2.29\lib\net45\LibUsbDotNet.LibUsbDotNet.dll</HintPath>
+    </Reference>
     <Reference Include="Midi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\midi-dot-net2.2.0.1\lib\net461\Midi.dll</HintPath>
     </Reference>

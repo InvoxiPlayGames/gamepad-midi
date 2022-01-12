@@ -12,6 +12,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controller.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ControllerEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ControllerMonitor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)USBControllerMonitor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)XboxControllerMonitor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Translators\DrumTranslator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EventExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ITranslator.cs" />

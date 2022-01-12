@@ -38,6 +38,22 @@ namespace LibPlasticInstrument
       SendMessages(keys, sustain, velocities);
       sustainState = sustain;
     }
+    public void WiiEventHandler(byte[] bytes)
+    {
+      var (keys, sustain, velocities) = WiiBytesToKeyState(bytes);
+      if (bytes[2] == 6) // dpad left
+      {
+        offset = Math.Max(offset - 12, 0);
+        OnBasePitchChanged.ThreadSafeInvoke((Midi.Enums.Pitch)offset);
+      }
+      else if (bytes[2] == 2) // dpad left
+      {
+        offset = Math.Min(offset + 12, 127);
+        OnBasePitchChanged.ThreadSafeInvoke((Midi.Enums.Pitch)offset);
+      }
+      SendMessages(keys, sustain, velocities);
+      sustainState = sustain;
+    }
 
     public static (bool[] keys, bool sustain, byte[] velocities) GamepadToKeyState(XInput.GamepadEx state)
     {
@@ -69,6 +85,37 @@ namespace LibPlasticInstrument
         $"Sustain: {(sustain ? 1 : 0)} " +
         $"Velocities: {velocities.Select(x => x.ToString().PadLeft(3)).Aggregate((x, y) => x + " " + y)} " +
         $"State: {(int)state.wButtons:X4}");
+#endif
+      return (keys, sustain, velocities);
+    }
+
+    public static (bool[] keys, bool sustain, byte[] velocities) WiiBytesToKeyState(byte[] bytes)
+    {
+      bool sustain = false; // todo
+
+      var velocities = new byte[]
+      {
+        (byte)(bytes[8] & 0x7F),
+        (byte)(bytes[9] & 0x7F),
+        (byte)(bytes[10] & 0x7F),
+        (byte)(bytes[11] & 0x7F),
+        (byte)(bytes[12] & 0x7F)
+      };
+     
+      var keys = new bool[25];
+      int appended = (bytes[5] << 17) | (bytes[6] << 9) | (bytes[7] << 1) | (bytes[8] >> 7);
+      int test = 1 << 24;
+      int key = 0;
+      for (var i = 0; i < 25; i++)
+      {
+        int mask = test >> i;
+        keys[key++] = (appended & mask) == mask;
+      }
+#if DEBUG
+      Console.WriteLine(
+        $"Keys: {Convert.ToString(appended, 2).PadLeft(25, '0')} " +
+        $"Sustain: {(sustain ? 1 : 0)} " +
+        $"Velocities: {velocities.Select(x => x.ToString().PadLeft(3)).Aggregate((x, y) => x + " " + y)}");
 #endif
       return (keys, sustain, velocities);
     }
