@@ -1,5 +1,7 @@
 # GamepadMidi
 
+[![Windows Build](https://ci.appveyor.com/api/projects/status/5w8y2qrnh7rj4q50?svg=true)](https://ci.appveyor.com/project/InvoxiPlayGames/gamepad-midi/build/artifacts)
+
 Use your Rock Band 3 Keytar or Drum Kit as a MIDI controller - wirelessly!
 Connect a controller, start the program, select the controller
 and the output MIDI device and start shredding.
